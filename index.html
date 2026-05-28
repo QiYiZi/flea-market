@@ -26,6 +26,7 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.15);
   }
   .header h1 { font-size: 20px; font-weight: 600; }
+  .header .seller-loc { font-size: 12px; opacity: 0.85; margin-top: 2px; }
   .header-btns { display: flex; gap: 8px; align-items: center; }
   .btn {
     padding: 8px 16px;
@@ -40,8 +41,10 @@
   .btn-outline:hover { background: rgba(255,255,255,0.1); }
   .btn-primary { background: #667eea; color: #fff; }
   .btn-primary:hover { background: #5a6fd6; }
+  .btn-white { background: #fff; color: #667eea; }
+  .btn-white:hover { background: #f0f0f0; }
 
-  .container { max-width: 1000px; margin: 0 auto; padding: 20px 16px; }
+  .container { max-width: 1000px; margin: 0 auto; padding: 20px 16px 40px; }
 
   /* filters */
   .filter-bar {
@@ -89,13 +92,15 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
   }
   .card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .card.sold { opacity: 0.7; }
   .card-img {
     width: 100%;
     height: 200px;
     object-fit: cover;
-    background: #e0e0e0;
+    background: #e8e8e8;
   }
   .card-img-placeholder {
     width: 100%;
@@ -107,22 +112,23 @@
     color: #aaa;
     font-size: 14px;
   }
-  .card-body { padding: 14px 16px; }
-  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
-  .card-cat { font-size: 11px; background: #eee; padding: 2px 8px; border-radius: 10px; color: #888; }
-  .card-price { font-size: 20px; font-weight: 700; color: #e94560; margin-bottom: 6px; }
-  .card-bottom { display: flex; gap: 8px; font-size: 12px; color: #888; align-items: center; }
-  .card-bottom .want-count { color: #e94560; font-weight: 600; }
-  .tag-sold {
-    display: inline-block;
-    background: #e94560;
-    color: #fff !important;
-    font-size: 11px;
-    padding: 1px 6px;
-    border-radius: 3px;
-    margin-left: 6px;
-    vertical-align: middle;
+  .sold-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(233,69,96,0.9);
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 600;
   }
+  .card-body { padding: 14px 16px; }
+  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .card-cat { font-size: 11px; background: #f0f0f0; padding: 2px 8px; border-radius: 10px; color: #888; white-space: nowrap; flex-shrink: 0; }
+  .card-price { font-size: 20px; font-weight: 700; color: #e94560; margin: 6px 0 4px; }
+  .card-bottom { display: flex; gap: 8px; font-size: 12px; color: #888; align-items: center; flex-wrap: wrap; }
+  .card-bottom .want-hint { color: #e94560; font-weight: 600; }
 
   /* modal */
   .modal-overlay {
@@ -139,7 +145,7 @@
   .modal {
     background: #fff;
     border-radius: 16px;
-    max-width: 600px;
+    max-width: 560px;
     width: 100%;
     max-height: 85vh;
     overflow-y: auto;
@@ -164,60 +170,54 @@
   }
   .modal-desc { color: #555; line-height: 1.7; margin-bottom: 20px; white-space: pre-wrap; }
   .modal-section { border-top: 1px solid #eee; padding-top: 16px; margin-top: 16px; }
-  .modal-section h3 { font-size: 15px; margin-bottom: 12px; color: #333; }
+  .modal-section h3 { font-size: 15px; margin-bottom: 8px; color: #333; }
 
-  .want-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
-  .input {
-    flex: 1;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 14px;
-    outline: none;
-    font-family: inherit;
+  .contact-box {
+    background: #fdf2f8;
+    border: 1px solid #f9a8d4;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
   }
-  .input:focus { border-color: #667eea; }
-  textarea.input { resize: vertical; }
-  .btn-want {
-    padding: 10px 24px;
+  .contact-box .qq-num {
+    font-size: 26px;
+    font-weight: 700;
+    color: #e94560;
+    letter-spacing: 1px;
+    user-select: all;
+    cursor: pointer;
+  }
+  .contact-box .hint { font-size: 12px; color: #999; margin-top: 4px; }
+  .btn-copy {
+    margin-top: 8px;
+    padding: 8px 20px;
     background: #e94560;
     color: #fff;
     border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
+    border-radius: 6px;
+    font-size: 14px;
     cursor: pointer;
-    transition: background 0.2s;
   }
-  .btn-want:hover { background: #c0392b; }
-  .btn-want:disabled { background: #ccc; cursor: not-allowed; }
-
-  .comment-list { max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
-  .comment {
-    padding: 8px 0;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 13px;
-    line-height: 1.6;
+  .btn-copy:hover { background: #c0392b; }
+  .copied-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 999;
+    animation: fadeInOut 2s ease;
   }
-  .comment .who { font-weight: 600; color: #667eea; margin-right: 6px; }
-  .comment .time { font-size: 11px; color: #aaa; margin-left: 8px; }
-  .comment .tag-want { background: #ffe0e0; color: #e94560; font-size: 11px; padding: 1px 6px; border-radius: 3px; margin-right: 4px; }
-  .comment-input-row { display: flex; gap: 8px; }
-  .comment-input-row .input { flex: 1; }
-
-  .admin-bar {
-    display: none;
-    background: #fff3cd;
-    padding: 8px 24px;
-    text-align: center;
-    font-size: 13px;
-    color: #856404;
-    position: sticky;
-    top: 60px;
-    z-index: 99;
+  @keyframes fadeInOut {
+    0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    75% { opacity: 1; }
+    100% { opacity: 0; }
   }
-  .admin-bar.active { display: block; }
-  .admin-bar a { color: #856404; margin: 0 8px; cursor: pointer; text-decoration: underline; }
 
   .close-btn {
     float: right;
@@ -231,11 +231,32 @@
   }
   .close-btn:hover { color: #333; }
 
-  .modal-actions { display: flex; gap: 8px; margin-bottom: 16px; }
-  .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 4px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
-  .btn-sm:hover { background: #f5f5f5; }
+  .admin-bar {
+    display: none;
+    background: #fff3cd;
+    padding: 8px 24px;
+    text-align: center;
+    font-size: 13px;
+    color: #856404;
+    position: sticky;
+    top: 64px;
+    z-index: 99;
+  }
+  .admin-bar.active { display: block; }
+  .admin-bar a { color: #856404; margin: 0 8px; cursor: pointer; text-decoration: underline; }
 
-  /* image upload in edit form */
+  .input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+  }
+  .input:focus { border-color: #667eea; }
+  textarea.input { resize: vertical; }
+
   .img-upload-area {
     border: 2px dashed #ddd;
     border-radius: 8px;
@@ -244,21 +265,12 @@
     cursor: pointer;
     color: #999;
     transition: border-color 0.2s;
-    position: relative;
   }
   .img-upload-area:hover { border-color: #667eea; }
-  .img-upload-area img {
-    max-width: 100%;
-    max-height: 200px;
-    border-radius: 4px;
-    display: block;
-    margin: 0 auto;
-  }
+  .img-upload-area img { max-width: 100%; max-height: 200px; border-radius: 4px; display: block; margin: 0 auto; }
   .img-upload-area .hint { font-size: 13px; margin-top: 8px; display: block; }
   .img-upload-area input[type="file"] { display: none; }
-  .img-url-input { margin-top: 8px; }
 
-  /* settings */
   .settings-row {
     display: flex;
     gap: 8px;
@@ -267,10 +279,11 @@
   }
   .settings-row label { min-width: 70px; font-size: 13px; color: #666; }
 
+  .item-count { font-size: 13px; color: #999; margin-bottom: 12px; }
+
   @media (max-width: 600px) {
     .header h1 { font-size: 16px; }
     .grid { grid-template-columns: 1fr; }
-    .want-row { flex-direction: column; }
     .filter-bar { gap: 4px; }
     .sort-select { margin-left: 0; }
   }
@@ -279,23 +292,25 @@
 <body>
 
 <div class="header">
-  <h1>🎓 毕业清仓 · 二手小铺</h1>
+  <div>
+    <h1>🎓 毕业清仓 · 二手小铺</h1>
+    <div class="seller-loc">📍 南区澈苑74-215</div>
+  </div>
   <div class="header-btns">
-    <button class="btn btn-outline" onclick="openSettings()" title="设置">⚙️</button>
-    <button class="btn btn-outline" onclick="toggleAdmin()" id="adminBtn">🔑 管理</button>
+    <button class="btn btn-outline" onclick="toggleAdmin()" id="adminBtn">🔑 管理物品</button>
   </div>
 </div>
 
 <div class="admin-bar" id="adminBar">
-  管理模式已开启 ·
+  管理模式 ·
   <a onclick="showAddForm()">➕ 发布新物品</a> ·
-  <a onclick="openSettings()">⚙️ 设置</a> ·
-  <a onclick="toggleAdmin()">退出管理</a>
+  <a onclick="exportData()">📥 导出数据文件</a> ·
+  <a onclick="toggleAdmin()">退出</a>
 </div>
 
 <div class="container" id="app"></div>
 
-<!-- ===== 物品详情弹窗 ===== -->
+<!-- 详情弹窗 -->
 <div class="modal-overlay" id="detailModal">
   <div class="modal">
     <button class="close-btn" onclick="closeDetail()">&times;</button>
@@ -306,41 +321,32 @@
       <div class="modal-tags" id="detailTags"></div>
       <div class="modal-desc" id="detailDesc"></div>
 
-      <div class="modal-actions" id="adminActions" style="display:none">
-        <button class="btn-sm" onclick="editItem(currentItemId)">✏️ 编辑</button>
-        <button class="btn-sm" style="color:#e94560" onclick="deleteItem(currentItemId)">🗑 删除</button>
-        <button class="btn-sm" id="toggleSoldBtn" onclick="toggleSold(currentItemId)"></button>
+      <div id="adminActions" style="display:none;margin-bottom:12px;display:flex;gap:8px;">
+        <button class="btn btn-sm" onclick="editItem(currentItemId)" style="border:1px solid #ddd;background:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px">✏️ 编辑</button>
+        <button class="btn btn-sm" onclick="toggleSold(currentItemId)" id="toggleSoldBtn" style="border:1px solid #ddd;background:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px"></button>
+        <button class="btn btn-sm" onclick="deleteItem(currentItemId)" style="border:1px solid #ddd;background:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;color:#e94560">🗑 删除</button>
       </div>
 
       <div class="modal-section">
-        <h3>📩 想买？留下你的联系方式</h3>
-        <div class="want-row">
-          <input class="input" id="wantQQ" placeholder="QQ号或微信号" maxlength="50">
-          <button class="btn-want" id="wantBtn" onclick="sendWant()">我想要！</button>
-        </div>
-      </div>
-
-      <div class="modal-section">
-        <h3>💬 留言</h3>
-        <div class="comment-list" id="commentList"></div>
-        <div class="comment-input-row">
-          <input class="input" id="commentName" placeholder="你的昵称" maxlength="20" style="max-width:100px">
-          <input class="input" id="commentText" placeholder="写句留言..." maxlength="200">
-          <button class="btn btn-primary btn-sm" onclick="sendComment()">发送</button>
+        <h3>📩 想要这个？</h3>
+        <div class="contact-box">
+          <div style="margin-bottom:4px;font-size:13px;color:#666">联系卖家 QQ</div>
+          <div class="qq-num" id="sellerQQ" onclick="copyQQ()"></div>
+          <div class="hint">点击 QQ 号复制，或点下方按钮</div>
+          <button class="btn-copy" onclick="copyQQ()">📋 复制 QQ 号</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===== 编辑/发布弹窗 ===== -->
+<!-- 编辑弹窗 -->
 <div class="modal-overlay" id="editModal">
   <div class="modal" style="max-width:500px">
     <div class="modal-content">
       <h3 id="editTitle">发布新物品</h3>
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
         <input class="input" id="editName" placeholder="物品名称 *" maxlength="50">
-
         <select class="input" id="editCategory">
           <option value="">选择分类</option>
           <option value="数码电子">数码电子</option>
@@ -350,22 +356,20 @@
           <option value="运动户外">运动户外</option>
           <option value="其他">其他</option>
         </select>
-
         <input class="input" id="editPrice" placeholder="价格，例如：50元 / 白送 / 可议价 *" maxlength="30">
 
-        <!-- 图片上传 -->
         <div class="img-upload-area" id="imgUploadArea" onclick="document.getElementById('fileInput').click()">
           <img id="imgPreview" src="" style="display:none">
-          <span class="hint" id="imgHint">📷 点击上传图片（或粘贴图片URL）</span>
+          <span class="hint" id="imgHint">📷 点击上传图片（可选）</span>
           <input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)">
         </div>
-        <input class="input img-url-input" id="editImageUrl" placeholder="或粘贴图片链接..." maxlength="500" oninput="onImageUrlInput()">
+        <input class="input" id="editImageUrl" placeholder="或粘贴图片链接..." maxlength="500" oninput="onImageUrlInput()">
 
         <input class="input" id="editCondition" placeholder="成色（如：九成新）" maxlength="20">
         <textarea class="input" id="editDesc" placeholder="详细描述..." rows="4" maxlength="500"></textarea>
 
         <div style="display:flex;gap:8px;justify-content:flex-end">
-          <button class="btn" onclick="closeEdit()">取消</button>
+          <button class="btn" onclick="closeEdit()" style="background:#fff;border:1px solid #ddd">取消</button>
           <button class="btn btn-primary" id="saveBtn" onclick="saveItem()">保存</button>
         </div>
       </div>
@@ -373,41 +377,40 @@
   </div>
 </div>
 
-<!-- ===== 管理员登录弹窗 ===== -->
+<!-- 登录弹窗 -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal" style="max-width:340px">
     <div class="modal-content" style="text-align:center">
-      <h3>🔐 管理员登录</h3>
-      <input class="input" id="loginPwd" type="password" placeholder="输入管理密码" maxlength="30" style="margin-top:12px">
+      <h3>🔐 管理登录</h3>
+      <input class="input" id="loginPwd" type="password" placeholder="管理密码" maxlength="30" style="margin-top:12px">
       <button class="btn btn-primary" onclick="doLogin()" style="width:100%;margin-top:12px">登录</button>
-      <p style="font-size:12px;color:#999;margin-top:8px">默认密码 123456，登录后可在设置里修改</p>
+      <p style="font-size:12px;color:#999;margin-top:8px">默认密码 123456 · 登录后在设置里修改</p>
     </div>
   </div>
 </div>
 
-<!-- ===== 设置弹窗 ===== -->
+<!-- 设置弹窗 -->
 <div class="modal-overlay" id="settingsModal">
-  <div class="modal" style="max-width:440px">
+  <div class="modal" style="max-width:420px">
     <div class="modal-content">
       <h3>⚙️ 设置</h3>
-      <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+        <div class="settings-row">
+          <label>你的 QQ</label>
+          <input class="input" id="settingsQQ" type="text" maxlength="30" style="flex:1" placeholder="让买家联系你的QQ号">
+        </div>
         <div class="settings-row">
           <label>管理密码</label>
           <input class="input" id="settingsPwd" type="text" maxlength="30" style="flex:1">
-          <button class="btn btn-primary btn-sm" onclick="saveSettings()">保存</button>
         </div>
         <div class="settings-row">
           <label>取货地点</label>
-          <input class="input" id="settingsLocation" type="text" maxlength="50" style="flex:1" disabled>
+          <input class="input" id="settingsLocation" type="text" maxlength="50" style="flex:1">
         </div>
-        <p style="font-size:12px;color:#999">
-          这个页面是你本地的 HTML 文件，别人无法访问。<br>
-          <strong>想让别人访问？</strong>可以把文件部署到：
-          GitHub Pages（免费）、Cloudflare Pages（免费）、或者用 ngrok 临时分享。
-        </p>
-        <div style="display:flex;gap:8px;justify-content:flex-end">
-          <button class="btn btn-sm" onclick="clearAllData()" style="color:#e94560">清空所有数据</button>
-          <button class="btn" onclick="document.getElementById('settingsModal').classList.remove('active')">关闭</button>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+          <button class="btn btn-sm" onclick="clearAllData()" style="color:#e94560;border:1px solid #ddd;background:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px">清空数据</button>
+          <button class="btn" onclick="saveSettings()" style="background:#667eea;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:13px">保存设置</button>
+          <button class="btn" onclick="document.getElementById('settingsModal').classList.remove('active')" style="background:#fff;border:1px solid #ddd;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px">关闭</button>
         </div>
       </div>
     </div>
@@ -415,54 +418,87 @@
 </div>
 
 <script>
-// ===== 常量 =====
-const STORAGE_KEY = 'flea_items';
-const MSG_KEY = 'flea_messages';
-const PWD_KEY = 'flea_admin_pwd';
-const LOC_KEY = 'flea_location';
+// ===== 配置 =====
+const DATA_URL = 'data.json';
 const DEFAULT_LOCATION = '南区澈苑74-215';
-
 const CATEGORIES = ['数码电子', '书籍教材', '生活用品', '服饰鞋包', '运动户外', '其他'];
 
-// ===== 状态 =====
-let adminPassword = localStorage.getItem(PWD_KEY) || '123456';
-let sellerLocation = localStorage.getItem(LOC_KEY) || DEFAULT_LOCATION;
-let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-let messages = JSON.parse(localStorage.getItem(MSG_KEY) || '[]');
+// ===== 设置（存在 localStorage，不影响 data.json）=====
+let settings = {
+  sellerQQ: '',
+  adminPassword: '123456',
+  location: DEFAULT_LOCATION
+};
+try {
+  const saved = JSON.parse(localStorage.getItem('flea_settings'));
+  if (saved) settings = { ...settings, ...saved };
+} catch(e) {}
+
+function saveSettingsToDisk() {
+  localStorage.setItem('flea_settings', JSON.stringify(settings));
+}
+
+// ===== 物品数据 =====
+let serverItems = [];  // 从 data.json 加载的（线上共享数据）
+let localItems = [];   // 管理面板编辑的（localStorage 数据）
+
+try {
+  localItems = JSON.parse(localStorage.getItem('flea_local_items') || '[]');
+} catch(e) { localItems = []; }
+
+// 判断数据来源：如果 localItems 不为空且是管理员，使用 localItems；否则使用 serverItems
+// 对于普通访客，始终使用 serverItems
+
 let isAdmin = false;
 let currentItemId = null;
 let editingId = null;
-let uploadedImageData = null; // base64 of uploaded/resized image
+let uploadedImageData = null;
 let sortBy = (() => { try { return localStorage.getItem('flea_sort') || 'newest'; } catch(e) { return 'newest'; } })();
 let filterCategory = 'all';
 
-function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
-function saveMsg() { localStorage.setItem(MSG_KEY, JSON.stringify(messages)); }
+// ===== 加载线上数据 =====
+async function loadData() {
+  try {
+    const resp = await fetch(DATA_URL);
+    if (resp.ok) {
+      serverItems = await resp.json();
+    }
+  } catch(e) {
+    console.log('未能加载线上数据，使用本地数据');
+  }
 
-// 迁移旧数据（没有 category 字段的）
-let migrated = false;
-items.forEach(item => {
-  if (!item.category) { item.category = '其他'; migrated = true; }
-  if (item.location && item.location !== sellerLocation) { migrated = true; }
-  delete item.location;
-});
-if (migrated) save();
+  // 迁移旧数据：如果 localItems 为空但 localStorage 里有旧格式数据
+  if (localItems.length === 0) {
+    try {
+      const oldItems = JSON.parse(localStorage.getItem('flea_items'));
+      if (oldItems && oldItems.length > 0) {
+        localItems = oldItems;
+        localStorage.setItem('flea_local_items', JSON.stringify(localItems));
+        localStorage.removeItem('flea_items');
+      }
+    } catch(e) {}
+  }
 
-// 种子数据
-if (items.length === 0) {
-  items = [
-    { id: '1', title: '机械键盘 IKBC C87', category: '数码电子', price: '¥80', condition: '八成新', desc: '用了两年，Cherry 红轴，键帽有点打油。送拔键器。', image: '', sold: false, createdAt: Date.now() - 86400000 },
-    { id: '2', title: '《算法导论》第三版', category: '书籍教材', price: '¥25', condition: '七成新', desc: '有笔记和划线，不影响阅读。附赠课后习题答案PDF。', image: '', sold: false, createdAt: Date.now() - 172800000 },
-    { id: '3', title: '小米 LED 护眼台灯', category: '生活用品', price: '¥45', condition: '九五新', desc: '买了不到半年，三档调光，无闪烁。原价129。', image: '', sold: false, createdAt: Date.now() - 259200000 }
-  ];
-  save();
+  render();
 }
 
-// ===== 渲染首页 =====
+// 获取当前显示的物品列表
+function getActiveItems() {
+  if (isAdmin && localItems.length > 0) {
+    return localItems;
+  }
+  if (isAdmin && localItems.length === 0 && serverItems.length > 0) {
+    return serverItems;
+  }
+  return serverItems.length > 0 ? serverItems : localItems;
+}
+
+// ===== 渲染 =====
 function render() {
   const app = document.getElementById('app');
+  const allItems = getActiveItems();
 
-  // 分类筛选 + 排序栏
+  // 分类筛选栏
   let filterHTML = `<div class="filter-bar">
     <button class="filter-btn ${filterCategory === 'all' ? 'active' : ''}" onclick="setFilter('all')">全部</button>`;
   CATEGORIES.forEach(cat => {
@@ -471,31 +507,23 @@ function render() {
   filterHTML += `
     <select class="sort-select" onchange="setSort(this.value)">
       <option value="newest" ${sortBy === 'newest' ? 'selected' : ''}>🕒 最新发布</option>
-      <option value="wanted" ${sortBy === 'wanted' ? 'selected' : ''}>🔥 最受欢迎</option>
       <option value="priceAsc" ${sortBy === 'priceAsc' ? 'selected' : ''}>💰 价格从低到高</option>
       <option value="priceDesc" ${sortBy === 'priceDesc' ? 'selected' : ''}>💎 价格从高到低</option>
     </select>
   </div>`;
 
-  // 筛选 + 排序
-  let list = [...items];
+  let list = [...allItems];
   if (filterCategory !== 'all') list = list.filter(i => i.category === filterCategory);
 
   const activeItems = list.filter(i => !i.sold);
   const soldItems = list.filter(i => i.sold);
 
-  // 排序（已售出始终放最后）
   function sortFn(arr) {
-    const counts = {}; // cache want counts
     arr.sort((a, b) => {
       switch (sortBy) {
-        case 'wanted':
-          if (!counts[a.id]) counts[a.id] = messages.filter(m => m.itemId === a.id && m.type === 'want').length;
-          if (!counts[b.id]) counts[b.id] = messages.filter(m => m.itemId === b.id && m.type === 'want').length;
-          return counts[b.id] - counts[a.id];
         case 'priceAsc': return parsePrice(a.price) - parsePrice(b.price);
         case 'priceDesc': return parsePrice(b.price) - parsePrice(a.price);
-        default: return b.createdAt - a.createdAt; // newest
+        default: return (b.createdAt || 0) - (a.createdAt || 0);
       }
     });
     return arr;
@@ -505,45 +533,45 @@ function render() {
 
   if (sorted.length === 0) {
     app.innerHTML = filterHTML + `<div class="empty-state">
-      <div class="icon">📦</div><p>这个分类下还没有物品</p>
+      <div class="icon">📦</div>
+      <p>${isAdmin ? '还没有物品，点上方「发布新物品」添加' : '暂时还没有物品~'}</p>
     </div>`;
   } else {
-    app.innerHTML = filterHTML + `<div class="grid">${sorted.map(item => cardHTML(item)).join('')}</div>`;
+    const countInfo = `<div class="item-count">共 ${activeItems.length} 件在售${soldItems.length > 0 ? `，${soldItems.length} 件已售` : ''}</div>`;
+    app.innerHTML = filterHTML + countInfo + `<div class="grid">${sorted.map(item => cardHTML(item)).join('')}</div>`;
   }
 
-  document.getElementById('adminBtn').textContent = isAdmin ? '✅ 管理' : '🔑 管理';
+  document.getElementById('adminBtn').textContent = isAdmin ? '✅ 管理中' : '🔑 管理物品';
   document.getElementById('adminBar').classList.toggle('active', isAdmin);
+
+  // 更新页头地点
+  document.querySelector('.seller-loc').textContent = '📍 ' + settings.location;
 }
 
 function parsePrice(p) {
-  const m = p.match(/[\d.]+/);
+  const m = String(p).match(/[\d.]+/);
   return m ? parseFloat(m[0]) : Infinity;
-}
-
-function getWantCount(itemId) {
-  return messages.filter(m => m.itemId === itemId && m.type === 'want').length;
 }
 
 function cardHTML(item) {
   const imgHTML = item.image
-    ? `<img class="card-img" src="${escAttr(item.image)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-placeholder" style="display:none">📷 图片加载失败</div>`
+    ? `<img class="card-img" src="${escAttr(item.image)}" alt="" loading="lazy" onerror="this.parentElement.querySelector('.card-img-placeholder').style.display='flex';this.style.display='none'"><div class="card-img-placeholder" style="display:none">📷</div>`
     : '<div class="card-img-placeholder">📷 暂无图片</div>';
-
-  const soldTag = item.sold ? '<span class="tag-sold">已售出</span>' : '';
-  const wantCount = getWantCount(item.id);
+  const soldBadge = item.sold ? '<div class="sold-badge">已售出</div>' : '';
 
   return `
-    <div class="card" onclick="openDetail('${item.id}')">
+    <div class="card ${item.sold ? 'sold' : ''}" onclick="openDetail('${item.id}')">
+      ${soldBadge}
       ${imgHTML}
       <div class="card-body">
         <div class="card-title">
-          <span>${esc(item.title)} ${soldTag}</span>
+          <span>${esc(item.title)}</span>
           <span class="card-cat">${esc(item.category || '其他')}</span>
         </div>
         <div class="card-price">${esc(item.price)}</div>
         <div class="card-bottom">
           <span>${esc(item.condition)}</span>
-          ${wantCount > 0 ? `<span class="want-count">🔥 ${wantCount} 人想要</span>` : ''}
+          <span class="want-hint">📩 想要？点我</span>
           <span style="margin-left:auto">🕒 ${timeAgo(item.createdAt)}</span>
         </div>
       </div>
@@ -551,6 +579,7 @@ function cardHTML(item) {
 }
 
 function timeAgo(ts) {
+  if (!ts) return '';
   const diff = Date.now() - ts;
   const m = Math.floor(diff / 60000);
   if (m < 60) return m <= 0 ? '刚刚' : `${m}分钟前`;
@@ -561,27 +590,21 @@ function timeAgo(ts) {
 
 function esc(s) {
   const d = document.createElement('div');
-  d.textContent = s;
+  d.textContent = String(s);
   return d.innerHTML;
 }
 function escAttr(s) {
-  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function setFilter(cat) {
-  filterCategory = cat;
-  render();
-}
-function setSort(s) {
-  sortBy = s;
-  localStorage.setItem('flea_sort', s);
-  render();
-}
+function setFilter(cat) { filterCategory = cat; render(); }
+function setSort(s) { sortBy = s; localStorage.setItem('flea_sort', s); render(); }
 
 // ===== 详情弹窗 =====
 function openDetail(id) {
   currentItemId = id;
-  const item = items.find(i => i.id === id);
+  const allItems = getActiveItems();
+  const item = allItems.find(i => i.id === id);
   if (!item) return;
 
   const detailImg = document.getElementById('detailImg');
@@ -596,20 +619,22 @@ function openDetail(id) {
   document.getElementById('detailTags').innerHTML = `
     <span>📂 ${esc(item.category || '其他')}</span>
     <span>${esc(item.condition)}</span>
-    <span>📍 ${esc(sellerLocation)}</span>
+    <span>📍 ${esc(settings.location)}</span>
     <span>🕒 ${timeAgo(item.createdAt)}</span>
     ${item.sold ? '<span style="background:#e94560;color:#fff">已售出</span>' : ''}
   `;
   document.getElementById('detailDesc').textContent = item.desc || '暂无描述';
+
+  // 管理按钮
   document.getElementById('adminActions').style.display = isAdmin ? 'flex' : 'none';
-  document.getElementById('toggleSoldBtn').textContent = item.sold ? '↩️ 标记为在售' : '🏷️ 标记为已售';
+  if (isAdmin) {
+    document.getElementById('toggleSoldBtn').textContent = item.sold ? '↩️ 标记为在售' : '🏷️ 标记为已售';
+  }
 
-  const wantCount = getWantCount(id);
-  document.getElementById('wantBtn').disabled = item.sold;
-  document.getElementById('wantBtn').textContent = item.sold ? '已售出' : (wantCount > 0 ? `我想要！(${wantCount})` : '我想要！');
-  document.getElementById('wantQQ').disabled = item.sold;
+  // QQ 联系方式
+  const qq = settings.sellerQQ || '请先设置QQ号';
+  document.getElementById('sellerQQ').textContent = qq;
 
-  renderComments(id);
   document.getElementById('detailModal').classList.add('active');
 }
 
@@ -618,73 +643,35 @@ function closeDetail() {
   currentItemId = null;
 }
 
-function renderComments(itemId) {
-  const list = document.getElementById('commentList');
-  const msgs = messages.filter(m => m.itemId === itemId).sort((a, b) => a.createdAt - b.createdAt);
-  if (msgs.length === 0) {
-    list.innerHTML = '<div style="color:#aaa;font-size:13px;padding:8px 0">暂无留言，来做第一个留言的人吧~</div>';
-    return;
-  }
-  list.innerHTML = msgs.map(m => {
-    const tag = m.type === 'want' ? '<span class="tag-want">想要</span>' : '';
-    const contact = m.qq ? ` 📎QQ/微信: ${esc(m.qq)}` : '';
-    return `<div class="comment">
-      ${tag}<span class="who">${esc(m.name || '匿名')}</span>${contact}：${esc(m.content)}<span class="time">${timeAgo(m.createdAt)}</span>
-    </div>`;
-  }).join('');
-  list.scrollTop = list.scrollHeight;
-}
-
-function sendWant() {
-  const qq = document.getElementById('wantQQ').value.trim();
-  const content = qq ? `我想买，联系方式：${qq}` : '我想买这个！';
-  addMessage(currentItemId, 'want', '买家', qq, content);
-  document.getElementById('wantQQ').value = '';
-  // refresh want count on button
-  const item = items.find(i => i.id === currentItemId);
-  if (item) {
-    const wc = getWantCount(currentItemId);
-    document.getElementById('wantBtn').textContent = `我想要！(${wc})`;
-  }
-  render(); // refresh card want counts
-}
-
-function sendComment() {
-  const name = document.getElementById('commentName').value.trim() || '匿名';
-  const text = document.getElementById('commentText').value.trim();
-  if (!text) return;
-  addMessage(currentItemId, 'comment', name, '', text);
-  document.getElementById('commentText').value = '';
-}
-
-function addMessage(itemId, type, name, qq, content) {
-  messages.push({ id: Date.now().toString(), itemId, type, name, qq, content, createdAt: Date.now() });
-  saveMsg();
-  renderComments(itemId);
+function copyQQ() {
+  const qq = settings.sellerQQ;
+  if (!qq) { alert('卖家还没设置QQ号'); return; }
+  navigator.clipboard.writeText(qq).then(() => {
+    const toast = document.createElement('div');
+    toast.className = 'copied-toast';
+    toast.textContent = `✅ QQ ${qq} 已复制到剪贴板`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2100);
+  }).catch(() => {
+    alert('QQ号：' + qq + '\n请手动复制');
+  });
 }
 
 // ===== 图片上传 =====
 function handleImageUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
-
   const reader = new FileReader();
   reader.onload = function(e) {
     const img = new Image();
     img.onload = function() {
-      // 缩放到最大宽度 800px
       const maxW = 800;
       let w = img.width, h = img.height;
       if (w > maxW) { h = h * maxW / w; w = maxW; }
-
       const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       uploadedImageData = canvas.toDataURL('image/jpeg', 0.75);
-
       const preview = document.getElementById('imgPreview');
       preview.src = uploadedImageData;
       preview.style.display = 'block';
@@ -700,15 +687,9 @@ function onImageUrlInput() {
   const url = document.getElementById('editImageUrl').value.trim();
   if (url) {
     uploadedImageData = url;
-    const preview = document.getElementById('imgPreview');
-    preview.src = url;
-    preview.style.display = 'block';
+    document.getElementById('imgPreview').src = url;
+    document.getElementById('imgPreview').style.display = 'block';
     document.getElementById('imgHint').style.display = 'none';
-  } else if (!uploadedImageData || uploadedImageData === url) {
-    // user cleared the URL input and had a URL-based image
-    uploadedImageData = null;
-    document.getElementById('imgPreview').style.display = 'none';
-    document.getElementById('imgHint').style.display = '';
   }
 }
 
@@ -734,7 +715,7 @@ function showAddForm() {
 }
 
 function editItem(id) {
-  const item = items.find(i => i.id === id);
+  const item = getActiveItems().find(i => i.id === id);
   if (!item) return;
   editingId = id;
   document.getElementById('editTitle').textContent = '编辑物品';
@@ -745,17 +726,14 @@ function editItem(id) {
   document.getElementById('editDesc').value = item.desc || '';
   document.getElementById('editImageUrl').value = '';
 
-  if (item.image && item.image.startsWith('data:')) {
+  if (item.image) {
     uploadedImageData = item.image;
     document.getElementById('imgPreview').src = item.image;
     document.getElementById('imgPreview').style.display = 'block';
     document.getElementById('imgHint').style.display = 'none';
-  } else if (item.image && item.image.startsWith('http')) {
-    uploadedImageData = item.image;
-    document.getElementById('editImageUrl').value = item.image;
-    document.getElementById('imgPreview').src = item.image;
-    document.getElementById('imgPreview').style.display = 'block';
-    document.getElementById('imgHint').style.display = 'none';
+    if (item.image.startsWith('http')) {
+      document.getElementById('editImageUrl').value = item.image;
+    }
   } else {
     resetImageUpload();
   }
@@ -772,24 +750,22 @@ function saveItem() {
   if (!category) { alert('请选择分类'); return; }
 
   const data = {
-    title,
-    category,
-    price,
+    title, category, price,
     image: uploadedImageData || '',
     condition: document.getElementById('editCondition').value.trim() || '未知',
     desc: document.getElementById('editDesc').value.trim(),
-    sold: editingId ? (items.find(i => i.id === editingId)?.sold || false) : false,
-    createdAt: editingId ? (items.find(i => i.id === editingId)?.createdAt || Date.now()) : Date.now()
+    sold: editingId ? (localItems.find(i => i.id === editingId)?.sold || false) : false,
+    createdAt: editingId ? (localItems.find(i => i.id === editingId)?.createdAt || Date.now()) : Date.now()
   };
 
   if (editingId) {
-    const idx = items.findIndex(i => i.id === editingId);
-    if (idx >= 0) items[idx] = { ...items[idx], ...data };
+    const idx = localItems.findIndex(i => i.id === editingId);
+    if (idx >= 0) localItems[idx] = { ...localItems[idx], ...data };
   } else {
-    items.unshift({ id: Date.now().toString(), ...data });
+    localItems.unshift({ id: Date.now().toString(), ...data });
   }
 
-  save();
+  localStorage.setItem('flea_local_items', JSON.stringify(localItems));
   closeEdit();
   render();
   if (editingId) { openDetail(editingId); }
@@ -797,23 +773,41 @@ function saveItem() {
 
 function deleteItem(id) {
   if (!confirm('确定要删除这个物品吗？')) return;
-  items = items.filter(i => i.id !== id);
-  messages = messages.filter(m => m.itemId !== id);
-  save();
-  saveMsg();
+  localItems = localItems.filter(i => i.id !== id);
+  localStorage.setItem('flea_local_items', JSON.stringify(localItems));
   closeDetail();
   render();
 }
 
 function toggleSold(id) {
-  const item = items.find(i => i.id === id);
-  if (item) { item.sold = !item.sold; save(); closeDetail(); render(); openDetail(id); }
+  const item = localItems.find(i => i.id === id);
+  if (item) {
+    item.sold = !item.sold;
+    localStorage.setItem('flea_local_items', JSON.stringify(localItems));
+    closeDetail();
+    render();
+    openDetail(id);
+  }
 }
 
 function closeEdit() {
   document.getElementById('editModal').classList.remove('active');
   editingId = null;
   resetImageUpload();
+}
+
+// ===== 导出 data.json =====
+function exportData() {
+  const items = localItems.length > 0 ? localItems : serverItems;
+  const json = JSON.stringify(items, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'data.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  alert('✅ data.json 已下载！\n\n把这个文件发给我，我帮你更新到网站上。');
 }
 
 // ===== 管理员 =====
@@ -824,70 +818,63 @@ function toggleAdmin() {
 }
 
 function doLogin() {
-  const pwd = document.getElementById('loginPwd').value;
-  if (pwd === adminPassword) {
+  if (document.getElementById('loginPwd').value === settings.adminPassword) {
     isAdmin = true;
     document.getElementById('loginModal').classList.remove('active');
     document.getElementById('loginPwd').value = '';
     render();
   } else {
-    alert('密码错误！如果忘记密码，可以打开浏览器控制台执行：localStorage.removeItem("flea_admin_pwd") 来重置');
+    alert('密码错误');
   }
 }
 
 // ===== 设置 =====
 function openSettings() {
-  document.getElementById('settingsPwd').value = adminPassword;
-  document.getElementById('settingsLocation').value = sellerLocation;
+  document.getElementById('settingsQQ').value = settings.sellerQQ;
+  document.getElementById('settingsPwd').value = settings.adminPassword;
+  document.getElementById('settingsLocation').value = settings.location;
   document.getElementById('settingsModal').classList.add('active');
 }
 
 function saveSettings() {
+  settings.sellerQQ = document.getElementById('settingsQQ').value.trim();
   const newPwd = document.getElementById('settingsPwd').value.trim();
   if (!newPwd) { alert('密码不能为空'); return; }
-  adminPassword = newPwd;
-  localStorage.setItem(PWD_KEY, newPwd);
+  settings.adminPassword = newPwd;
+  settings.location = document.getElementById('settingsLocation').value.trim() || DEFAULT_LOCATION;
+  saveSettingsToDisk();
   document.getElementById('settingsModal').classList.remove('active');
+  render();
   alert('设置已保存！');
 }
 
 function clearAllData() {
-  if (!confirm('确定要清空所有物品、留言数据吗？此操作不可恢复！')) return;
-  if (!confirm('再次确认：真的要删除所有数据吗？')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem(MSG_KEY);
-  items = [];
-  messages = [];
-  save();
-  saveMsg();
+  if (!confirm('确定要清空所有本地数据吗？此操作不可恢复！')) return;
+  if (!confirm('再次确认：真的要删除吗？')) return;
+  localStorage.removeItem('flea_local_items');
+  localStorage.removeItem('flea_settings');
+  localItems = [];
+  settings = { sellerQQ: '', adminPassword: '123456', location: DEFAULT_LOCATION };
+  saveSettingsToDisk();
   document.getElementById('settingsModal').classList.remove('active');
   render();
 }
 
 // ===== 弹窗事件 =====
-document.getElementById('detailModal').addEventListener('click', function(e) {
-  if (e.target === this) closeDetail();
-});
-document.getElementById('editModal').addEventListener('click', function(e) {
-  if (e.target === this) closeEdit();
-});
-document.getElementById('loginModal').addEventListener('click', function(e) {
-  if (e.target === this) document.getElementById('loginModal').classList.remove('active');
-});
-document.getElementById('settingsModal').addEventListener('click', function(e) {
-  if (e.target === this) document.getElementById('settingsModal').classList.remove('active');
-});
+document.getElementById('detailModal').addEventListener('click', function(e) { if (e.target === this) closeDetail(); });
+document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEdit(); });
+document.getElementById('loginModal').addEventListener('click', function(e) { if (e.target === this) document.getElementById('loginModal').classList.remove('active'); });
+document.getElementById('settingsModal').addEventListener('click', function(e) { if (e.target === this) document.getElementById('settingsModal').classList.remove('active'); });
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') { closeDetail(); closeEdit(); }
 });
 
-// 登录弹窗回车提交
 document.getElementById('loginPwd').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') doLogin();
 });
 
-// ===== 初始渲染 =====
-render();
+// ===== 启动 =====
+loadData();
 </script>
 </body>
 </html>

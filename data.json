@@ -1,0 +1,35 @@
+[
+  {
+    "id": "1",
+    "title": "机械键盘 IKBC C87",
+    "category": "数码电子",
+    "price": "¥80",
+    "condition": "八成新",
+    "desc": "用了两年，Cherry 红轴，键帽有点打油。送拔键器。",
+    "image": "",
+    "sold": false,
+    "createdAt": 1748476800000
+  },
+  {
+    "id": "2",
+    "title": "《算法导论》第三版",
+    "category": "书籍教材",
+    "price": "¥25",
+    "condition": "七成新",
+    "desc": "有笔记和划线，不影响阅读。附赠课后习题答案PDF。",
+    "image": "",
+    "sold": false,
+    "createdAt": 1748390400000
+  },
+  {
+    "id": "3",
+    "title": "小米 LED 护眼台灯",
+    "category": "生活用品",
+    "price": "¥45",
+    "condition": "九五新",
+    "desc": "买了不到半年，三档调光，无闪烁。原价129。",
+    "image": "",
+    "sold": false,
+    "createdAt": 1748304000000
+  }
+]
