@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>毕业清仓 · 二手小铺</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    min-height: 100vh;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+  .header h1 { font-size: 20px; font-weight: 600; }
+  .header-btns { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .btn-outline { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.5); }
+  .btn-outline:hover { background: rgba(255,255,255,0.1); }
+  .btn-primary { background: #667eea; color: #fff; }
+  .btn-primary:hover { background: #5a6fd6; }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 20px 16px; }
+
+  /* filters */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .filter-btn {
+    padding: 6px 14px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    color: #666;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: #667eea; color: #667eea; }
+  .filter-btn.active { background: #667eea; color: #fff; border-color: #667eea; }
+  .sort-select {
+    margin-left: auto;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #555;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  .empty-state { text-align: center; padding: 80px 20px; color: #999; }
+  .empty-state .icon { font-size: 64px; margin-bottom: 16px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .card-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: #e0e0e0;
+  }
+  .card-img-placeholder {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e8e8e8;
+    color: #aaa;
+    font-size: 14px;
+  }
+  .card-body { padding: 14px 16px; }
+  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+  .card-cat { font-size: 11px; background: #eee; padding: 2px 8px; border-radius: 10px; color: #888; }
+  .card-price { font-size: 20px; font-weight: 700; color: #e94560; margin-bottom: 6px; }
+  .card-bottom { display: flex; gap: 8px; font-size: 12px; color: #888; align-items: center; }
+  .card-bottom .want-count { color: #e94560; font-weight: 600; }
+  .tag-sold {
+    display: inline-block;
+    background: #e94560;
+    color: #fff !important;
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .modal-img {
+    width: 100%;
+    max-height: 360px;
+    object-fit: contain;
+    background: #f0f0f0;
+  }
+  .modal-content { padding: 20px 24px; }
+  .modal-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .modal-price { font-size: 28px; font-weight: 700; color: #e94560; margin-bottom: 12px; }
+  .modal-tags { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .modal-tags span {
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #f0f0f0;
+    color: #555;
+  }
+  .modal-desc { color: #555; line-height: 1.7; margin-bottom: 20px; white-space: pre-wrap; }
+  .modal-section { border-top: 1px solid #eee; padding-top: 16px; margin-top: 16px; }
+  .modal-section h3 { font-size: 15px; margin-bottom: 12px; color: #333; }
+
+  .want-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+  }
+  .input:focus { border-color: #667eea; }
+  textarea.input { resize: vertical; }
+  .btn-want {
+    padding: 10px 24px;
+    background: #e94560;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-want:hover { background: #c0392b; }
+  .btn-want:disabled { background: #ccc; cursor: not-allowed; }
+
+  .comment-list { max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
+  .comment {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .comment .who { font-weight: 600; color: #667eea; margin-right: 6px; }
+  .comment .time { font-size: 11px; color: #aaa; margin-left: 8px; }
+  .comment .tag-want { background: #ffe0e0; color: #e94560; font-size: 11px; padding: 1px 6px; border-radius: 3px; margin-right: 4px; }
+  .comment-input-row { display: flex; gap: 8px; }
+  .comment-input-row .input { flex: 1; }
+
+  .admin-bar {
+    display: none;
+    background: #fff3cd;
+    padding: 8px 24px;
+    text-align: center;
+    font-size: 13px;
+    color: #856404;
+    position: sticky;
+    top: 60px;
+    z-index: 99;
+  }
+  .admin-bar.active { display: block; }
+  .admin-bar a { color: #856404; margin: 0 8px; cursor: pointer; text-decoration: underline; }
+
+  .close-btn {
+    float: right;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #888;
+    padding: 4px 8px;
+    line-height: 1;
+  }
+  .close-btn:hover { color: #333; }
+
+  .modal-actions { display: flex; gap: 8px; margin-bottom: 16px; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 4px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
+  .btn-sm:hover { background: #f5f5f5; }
+
+  /* image upload in edit form */
+  .img-upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    color: #999;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+  .img-upload-area:hover { border-color: #667eea; }
+  .img-upload-area img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 4px;
+    display: block;
+    margin: 0 auto;
+  }
+  .img-upload-area .hint { font-size: 13px; margin-top: 8px; display: block; }
+  .img-upload-area input[type="file"] { display: none; }
+  .img-url-input { margin-top: 8px; }
+
+  /* settings */
+  .settings-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .settings-row label { min-width: 70px; font-size: 13px; color: #666; }
+
+  @media (max-width: 600px) {
+    .header h1 { font-size: 16px; }
+    .grid { grid-template-columns: 1fr; }
+    .want-row { flex-direction: column; }
+    .filter-bar { gap: 4px; }
+    .sort-select { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎓 毕业清仓 · 二手小铺</h1>
+  <div class="header-btns">
+    <button class="btn btn-outline" onclick="openSettings()" title="设置">⚙️</button>
+    <button class="btn btn-outline" onclick="toggleAdmin()" id="adminBtn">🔑 管理</button>
+  </div>
+</div>
+
+<div class="admin-bar" id="adminBar">
+  管理模式已开启 ·
+  <a onclick="showAddForm()">➕ 发布新物品</a> ·
+  <a onclick="openSettings()">⚙️ 设置</a> ·
+  <a onclick="toggleAdmin()">退出管理</a>
+</div>
+
+<div class="container" id="app"></div>
+
+<!-- ===== 物品详情弹窗 ===== -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeDetail()">&times;</button>
+    <img class="modal-img" id="detailImg" src="" alt="" style="display:none">
+    <div class="modal-content">
+      <h2 class="modal-title" id="detailTitle"></h2>
+      <div class="modal-price" id="detailPrice"></div>
+      <div class="modal-tags" id="detailTags"></div>
+      <div class="modal-desc" id="detailDesc"></div>
+
+      <div class="modal-actions" id="adminActions" style="display:none">
+        <button class="btn-sm" onclick="editItem(currentItemId)">✏️ 编辑</button>
+        <button class="btn-sm" style="color:#e94560" onclick="deleteItem(currentItemId)">🗑 删除</button>
+        <button class="btn-sm" id="toggleSoldBtn" onclick="toggleSold(currentItemId)"></button>
+      </div>
+
+      <div class="modal-section">
+        <h3>📩 想买？留下你的联系方式</h3>
+        <div class="want-row">
+          <input class="input" id="wantQQ" placeholder="QQ号或微信号" maxlength="50">
+          <button class="btn-want" id="wantBtn" onclick="sendWant()">我想要！</button>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3>💬 留言</h3>
+        <div class="comment-list" id="commentList"></div>
+        <div class="comment-input-row">
+          <input class="input" id="commentName" placeholder="你的昵称" maxlength="20" style="max-width:100px">
+          <input class="input" id="commentText" placeholder="写句留言..." maxlength="200">
+          <button class="btn btn-primary btn-sm" onclick="sendComment()">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 编辑/发布弹窗 ===== -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-content">
+      <h3 id="editTitle">发布新物品</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+        <input class="input" id="editName" placeholder="物品名称 *" maxlength="50">
+
+        <select class="input" id="editCategory">
+          <option value="">选择分类</option>
+          <option value="数码电子">数码电子</option>
+          <option value="书籍教材">书籍教材</option>
+          <option value="生活用品">生活用品</option>
+          <option value="服饰鞋包">服饰鞋包</option>
+          <option value="运动户外">运动户外</option>
+          <option value="其他">其他</option>
+        </select>
+
+        <input class="input" id="editPrice" placeholder="价格，例如：50元 / 白送 / 可议价 *" maxlength="30">
+
+        <!-- 图片上传 -->
+        <div class="img-upload-area" id="imgUploadArea" onclick="document.getElementById('fileInput').click()">
+          <img id="imgPreview" src="" style="display:none">
+          <span class="hint" id="imgHint">📷 点击上传图片（或粘贴图片URL）</span>
+          <input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)">
+        </div>
+        <input class="input img-url-input" id="editImageUrl" placeholder="或粘贴图片链接..." maxlength="500" oninput="onImageUrlInput()">
+
+        <input class="input" id="editCondition" placeholder="成色（如：九成新）" maxlength="20">
+        <textarea class="input" id="editDesc" placeholder="详细描述..." rows="4" maxlength="500"></textarea>
+
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn" onclick="closeEdit()">取消</button>
+          <button class="btn btn-primary" id="saveBtn" onclick="saveItem()">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 管理员登录弹窗 ===== -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal" style="max-width:340px">
+    <div class="modal-content" style="text-align:center">
+      <h3>🔐 管理员登录</h3>
+      <input class="input" id="loginPwd" type="password" placeholder="输入管理密码" maxlength="30" style="margin-top:12px">
+      <button class="btn btn-primary" onclick="doLogin()" style="width:100%;margin-top:12px">登录</button>
+      <p style="font-size:12px;color:#999;margin-top:8px">默认密码 123456，登录后可在设置里修改</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 设置弹窗 ===== -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-content">
+      <h3>⚙️ 设置</h3>
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+        <div class="settings-row">
+          <label>管理密码</label>
+          <input class="input" id="settingsPwd" type="text" maxlength="30" style="flex:1">
+          <button class="btn btn-primary btn-sm" onclick="saveSettings()">保存</button>
+        </div>
+        <div class="settings-row">
+          <label>取货地点</label>
+          <input class="input" id="settingsLocation" type="text" maxlength="50" style="flex:1" disabled>
+        </div>
+        <p style="font-size:12px;color:#999">
+          这个页面是你本地的 HTML 文件，别人无法访问。<br>
+          <strong>想让别人访问？</strong>可以把文件部署到：
+          GitHub Pages（免费）、Cloudflare Pages（免费）、或者用 ngrok 临时分享。
+        </p>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-sm" onclick="clearAllData()" style="color:#e94560">清空所有数据</button>
+          <button class="btn" onclick="document.getElementById('settingsModal').classList.remove('active')">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 常量 =====
+const STORAGE_KEY = 'flea_items';
+const MSG_KEY = 'flea_messages';
+const PWD_KEY = 'flea_admin_pwd';
+const LOC_KEY = 'flea_location';
+const DEFAULT_LOCATION = '南区澈苑74-215';
+
+const CATEGORIES = ['数码电子', '书籍教材', '生活用品', '服饰鞋包', '运动户外', '其他'];
+
+// ===== 状态 =====
+let adminPassword = localStorage.getItem(PWD_KEY) || '123456';
+let sellerLocation = localStorage.getItem(LOC_KEY) || DEFAULT_LOCATION;
+let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+let messages = JSON.parse(localStorage.getItem(MSG_KEY) || '[]');
+let isAdmin = false;
+let currentItemId = null;
+let editingId = null;
+let uploadedImageData = null; // base64 of uploaded/resized image
+let sortBy = (() => { try { return localStorage.getItem('flea_sort') || 'newest'; } catch(e) { return 'newest'; } })();
+let filterCategory = 'all';
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+function saveMsg() { localStorage.setItem(MSG_KEY, JSON.stringify(messages)); }
+
+// 迁移旧数据（没有 category 字段的）
+let migrated = false;
+items.forEach(item => {
+  if (!item.category) { item.category = '其他'; migrated = true; }
+  if (item.location && item.location !== sellerLocation) { migrated = true; }
+  delete item.location;
+});
+if (migrated) save();
+
+// 种子数据
+if (items.length === 0) {
+  items = [
+    { id: '1', title: '机械键盘 IKBC C87', category: '数码电子', price: '¥80', condition: '八成新', desc: '用了两年，Cherry 红轴，键帽有点打油。送拔键器。', image: '', sold: false, createdAt: Date.now() - 86400000 },
+    { id: '2', title: '《算法导论》第三版', category: '书籍教材', price: '¥25', condition: '七成新', desc: '有笔记和划线，不影响阅读。附赠课后习题答案PDF。', image: '', sold: false, createdAt: Date.now() - 172800000 },
+    { id: '3', title: '小米 LED 护眼台灯', category: '生活用品', price: '¥45', condition: '九五新', desc: '买了不到半年，三档调光，无闪烁。原价129。', image: '', sold: false, createdAt: Date.now() - 259200000 }
+  ];
+  save();
+}
+
+// ===== 渲染首页 =====
+function render() {
+  const app = document.getElementById('app');
+
+  // 分类筛选 + 排序栏
+  let filterHTML = `<div class="filter-bar">
+    <button class="filter-btn ${filterCategory === 'all' ? 'active' : ''}" onclick="setFilter('all')">全部</button>`;
+  CATEGORIES.forEach(cat => {
+    filterHTML += `<button class="filter-btn ${filterCategory === cat ? 'active' : ''}" onclick="setFilter('${cat}')">${cat}</button>`;
+  });
+  filterHTML += `
+    <select class="sort-select" onchange="setSort(this.value)">
+      <option value="newest" ${sortBy === 'newest' ? 'selected' : ''}>🕒 最新发布</option>
+      <option value="wanted" ${sortBy === 'wanted' ? 'selected' : ''}>🔥 最受欢迎</option>
+      <option value="priceAsc" ${sortBy === 'priceAsc' ? 'selected' : ''}>💰 价格从低到高</option>
+      <option value="priceDesc" ${sortBy === 'priceDesc' ? 'selected' : ''}>💎 价格从高到低</option>
+    </select>
+  </div>`;
+
+  // 筛选 + 排序
+  let list = [...items];
+  if (filterCategory !== 'all') list = list.filter(i => i.category === filterCategory);
+
+  const activeItems = list.filter(i => !i.sold);
+  const soldItems = list.filter(i => i.sold);
+
+  // 排序（已售出始终放最后）
+  function sortFn(arr) {
+    const counts = {}; // cache want counts
+    arr.sort((a, b) => {
+      switch (sortBy) {
+        case 'wanted':
+          if (!counts[a.id]) counts[a.id] = messages.filter(m => m.itemId === a.id && m.type === 'want').length;
+          if (!counts[b.id]) counts[b.id] = messages.filter(m => m.itemId === b.id && m.type === 'want').length;
+          return counts[b.id] - counts[a.id];
+        case 'priceAsc': return parsePrice(a.price) - parsePrice(b.price);
+        case 'priceDesc': return parsePrice(b.price) - parsePrice(a.price);
+        default: return b.createdAt - a.createdAt; // newest
+      }
+    });
+    return arr;
+  }
+
+  const sorted = [...sortFn(activeItems), ...sortFn(soldItems)];
+
+  if (sorted.length === 0) {
+    app.innerHTML = filterHTML + `<div class="empty-state">
+      <div class="icon">📦</div><p>这个分类下还没有物品</p>
+    </div>`;
+  } else {
+    app.innerHTML = filterHTML + `<div class="grid">${sorted.map(item => cardHTML(item)).join('')}</div>`;
+  }
+
+  document.getElementById('adminBtn').textContent = isAdmin ? '✅ 管理' : '🔑 管理';
+  document.getElementById('adminBar').classList.toggle('active', isAdmin);
+}
+
+function parsePrice(p) {
+  const m = p.match(/[\d.]+/);
+  return m ? parseFloat(m[0]) : Infinity;
+}
+
+function getWantCount(itemId) {
+  return messages.filter(m => m.itemId === itemId && m.type === 'want').length;
+}
+
+function cardHTML(item) {
+  const imgHTML = item.image
+    ? `<img class="card-img" src="${escAttr(item.image)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-placeholder" style="display:none">📷 图片加载失败</div>`
+    : '<div class="card-img-placeholder">📷 暂无图片</div>';
+
+  const soldTag = item.sold ? '<span class="tag-sold">已售出</span>' : '';
+  const wantCount = getWantCount(item.id);
+
+  return `
+    <div class="card" onclick="openDetail('${item.id}')">
+      ${imgHTML}
+      <div class="card-body">
+        <div class="card-title">
+          <span>${esc(item.title)} ${soldTag}</span>
+          <span class="card-cat">${esc(item.category || '其他')}</span>
+        </div>
+        <div class="card-price">${esc(item.price)}</div>
+        <div class="card-bottom">
+          <span>${esc(item.condition)}</span>
+          ${wantCount > 0 ? `<span class="want-count">🔥 ${wantCount} 人想要</span>` : ''}
+          <span style="margin-left:auto">🕒 ${timeAgo(item.createdAt)}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60000);
+  if (m < 60) return m <= 0 ? '刚刚' : `${m}分钟前`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}小时前`;
+  return `${Math.floor(h / 24)}天前`;
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+function escAttr(s) {
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function setFilter(cat) {
+  filterCategory = cat;
+  render();
+}
+function setSort(s) {
+  sortBy = s;
+  localStorage.setItem('flea_sort', s);
+  render();
+}
+
+// ===== 详情弹窗 =====
+function openDetail(id) {
+  currentItemId = id;
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+
+  const detailImg = document.getElementById('detailImg');
+  if (item.image) {
+    detailImg.src = item.image;
+    detailImg.style.display = '';
+  } else {
+    detailImg.style.display = 'none';
+  }
+  document.getElementById('detailTitle').textContent = item.title;
+  document.getElementById('detailPrice').textContent = item.price;
+  document.getElementById('detailTags').innerHTML = `
+    <span>📂 ${esc(item.category || '其他')}</span>
+    <span>${esc(item.condition)}</span>
+    <span>📍 ${esc(sellerLocation)}</span>
+    <span>🕒 ${timeAgo(item.createdAt)}</span>
+    ${item.sold ? '<span style="background:#e94560;color:#fff">已售出</span>' : ''}
+  `;
+  document.getElementById('detailDesc').textContent = item.desc || '暂无描述';
+  document.getElementById('adminActions').style.display = isAdmin ? 'flex' : 'none';
+  document.getElementById('toggleSoldBtn').textContent = item.sold ? '↩️ 标记为在售' : '🏷️ 标记为已售';
+
+  const wantCount = getWantCount(id);
+  document.getElementById('wantBtn').disabled = item.sold;
+  document.getElementById('wantBtn').textContent = item.sold ? '已售出' : (wantCount > 0 ? `我想要！(${wantCount})` : '我想要！');
+  document.getElementById('wantQQ').disabled = item.sold;
+
+  renderComments(id);
+  document.getElementById('detailModal').classList.add('active');
+}
+
+function closeDetail() {
+  document.getElementById('detailModal').classList.remove('active');
+  currentItemId = null;
+}
+
+function renderComments(itemId) {
+  const list = document.getElementById('commentList');
+  const msgs = messages.filter(m => m.itemId === itemId).sort((a, b) => a.createdAt - b.createdAt);
+  if (msgs.length === 0) {
+    list.innerHTML = '<div style="color:#aaa;font-size:13px;padding:8px 0">暂无留言，来做第一个留言的人吧~</div>';
+    return;
+  }
+  list.innerHTML = msgs.map(m => {
+    const tag = m.type === 'want' ? '<span class="tag-want">想要</span>' : '';
+    const contact = m.qq ? ` 📎QQ/微信: ${esc(m.qq)}` : '';
+    return `<div class="comment">
+      ${tag}<span class="who">${esc(m.name || '匿名')}</span>${contact}：${esc(m.content)}<span class="time">${timeAgo(m.createdAt)}</span>
+    </div>`;
+  }).join('');
+  list.scrollTop = list.scrollHeight;
+}
+
+function sendWant() {
+  const qq = document.getElementById('wantQQ').value.trim();
+  const content = qq ? `我想买，联系方式：${qq}` : '我想买这个！';
+  addMessage(currentItemId, 'want', '买家', qq, content);
+  document.getElementById('wantQQ').value = '';
+  // refresh want count on button
+  const item = items.find(i => i.id === currentItemId);
+  if (item) {
+    const wc = getWantCount(currentItemId);
+    document.getElementById('wantBtn').textContent = `我想要！(${wc})`;
+  }
+  render(); // refresh card want counts
+}
+
+function sendComment() {
+  const name = document.getElementById('commentName').value.trim() || '匿名';
+  const text = document.getElementById('commentText').value.trim();
+  if (!text) return;
+  addMessage(currentItemId, 'comment', name, '', text);
+  document.getElementById('commentText').value = '';
+}
+
+function addMessage(itemId, type, name, qq, content) {
+  messages.push({ id: Date.now().toString(), itemId, type, name, qq, content, createdAt: Date.now() });
+  saveMsg();
+  renderComments(itemId);
+}
+
+// ===== 图片上传 =====
+function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      // 缩放到最大宽度 800px
+      const maxW = 800;
+      let w = img.width, h = img.height;
+      if (w > maxW) { h = h * maxW / w; w = maxW; }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+
+      uploadedImageData = canvas.toDataURL('image/jpeg', 0.75);
+
+      const preview = document.getElementById('imgPreview');
+      preview.src = uploadedImageData;
+      preview.style.display = 'block';
+      document.getElementById('imgHint').style.display = 'none';
+      document.getElementById('editImageUrl').value = '';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function onImageUrlInput() {
+  const url = document.getElementById('editImageUrl').value.trim();
+  if (url) {
+    uploadedImageData = url;
+    const preview = document.getElementById('imgPreview');
+    preview.src = url;
+    preview.style.display = 'block';
+    document.getElementById('imgHint').style.display = 'none';
+  } else if (!uploadedImageData || uploadedImageData === url) {
+    // user cleared the URL input and had a URL-based image
+    uploadedImageData = null;
+    document.getElementById('imgPreview').style.display = 'none';
+    document.getElementById('imgHint').style.display = '';
+  }
+}
+
+function resetImageUpload() {
+  uploadedImageData = null;
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('imgHint').style.display = '';
+  document.getElementById('editImageUrl').value = '';
+  document.getElementById('fileInput').value = '';
+}
+
+// ===== 编辑/发布 =====
+function showAddForm() {
+  editingId = null;
+  document.getElementById('editTitle').textContent = '发布新物品';
+  document.getElementById('editName').value = '';
+  document.getElementById('editCategory').value = '';
+  document.getElementById('editPrice').value = '';
+  document.getElementById('editCondition').value = '';
+  document.getElementById('editDesc').value = '';
+  resetImageUpload();
+  document.getElementById('editModal').classList.add('active');
+}
+
+function editItem(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  editingId = id;
+  document.getElementById('editTitle').textContent = '编辑物品';
+  document.getElementById('editName').value = item.title;
+  document.getElementById('editCategory').value = item.category || '';
+  document.getElementById('editPrice').value = item.price;
+  document.getElementById('editCondition').value = item.condition;
+  document.getElementById('editDesc').value = item.desc || '';
+  document.getElementById('editImageUrl').value = '';
+
+  if (item.image && item.image.startsWith('data:')) {
+    uploadedImageData = item.image;
+    document.getElementById('imgPreview').src = item.image;
+    document.getElementById('imgPreview').style.display = 'block';
+    document.getElementById('imgHint').style.display = 'none';
+  } else if (item.image && item.image.startsWith('http')) {
+    uploadedImageData = item.image;
+    document.getElementById('editImageUrl').value = item.image;
+    document.getElementById('imgPreview').src = item.image;
+    document.getElementById('imgPreview').style.display = 'block';
+    document.getElementById('imgHint').style.display = 'none';
+  } else {
+    resetImageUpload();
+  }
+
+  document.getElementById('detailModal').classList.remove('active');
+  document.getElementById('editModal').classList.add('active');
+}
+
+function saveItem() {
+  const title = document.getElementById('editName').value.trim();
+  const price = document.getElementById('editPrice').value.trim();
+  const category = document.getElementById('editCategory').value;
+  if (!title || !price) { alert('物品名称和价格为必填'); return; }
+  if (!category) { alert('请选择分类'); return; }
+
+  const data = {
+    title,
+    category,
+    price,
+    image: uploadedImageData || '',
+    condition: document.getElementById('editCondition').value.trim() || '未知',
+    desc: document.getElementById('editDesc').value.trim(),
+    sold: editingId ? (items.find(i => i.id === editingId)?.sold || false) : false,
+    createdAt: editingId ? (items.find(i => i.id === editingId)?.createdAt || Date.now()) : Date.now()
+  };
+
+  if (editingId) {
+    const idx = items.findIndex(i => i.id === editingId);
+    if (idx >= 0) items[idx] = { ...items[idx], ...data };
+  } else {
+    items.unshift({ id: Date.now().toString(), ...data });
+  }
+
+  save();
+  closeEdit();
+  render();
+  if (editingId) { openDetail(editingId); }
+}
+
+function deleteItem(id) {
+  if (!confirm('确定要删除这个物品吗？')) return;
+  items = items.filter(i => i.id !== id);
+  messages = messages.filter(m => m.itemId !== id);
+  save();
+  saveMsg();
+  closeDetail();
+  render();
+}
+
+function toggleSold(id) {
+  const item = items.find(i => i.id === id);
+  if (item) { item.sold = !item.sold; save(); closeDetail(); render(); openDetail(id); }
+}
+
+function closeEdit() {
+  document.getElementById('editModal').classList.remove('active');
+  editingId = null;
+  resetImageUpload();
+}
+
+// ===== 管理员 =====
+function toggleAdmin() {
+  if (isAdmin) { isAdmin = false; render(); return; }
+  document.getElementById('loginModal').classList.add('active');
+  document.getElementById('loginPwd').focus();
+}
+
+function doLogin() {
+  const pwd = document.getElementById('loginPwd').value;
+  if (pwd === adminPassword) {
+    isAdmin = true;
+    document.getElementById('loginModal').classList.remove('active');
+    document.getElementById('loginPwd').value = '';
+    render();
+  } else {
+    alert('密码错误！如果忘记密码，可以打开浏览器控制台执行：localStorage.removeItem("flea_admin_pwd") 来重置');
+  }
+}
+
+// ===== 设置 =====
+function openSettings() {
+  document.getElementById('settingsPwd').value = adminPassword;
+  document.getElementById('settingsLocation').value = sellerLocation;
+  document.getElementById('settingsModal').classList.add('active');
+}
+
+function saveSettings() {
+  const newPwd = document.getElementById('settingsPwd').value.trim();
+  if (!newPwd) { alert('密码不能为空'); return; }
+  adminPassword = newPwd;
+  localStorage.setItem(PWD_KEY, newPwd);
+  document.getElementById('settingsModal').classList.remove('active');
+  alert('设置已保存！');
+}
+
+function clearAllData() {
+  if (!confirm('确定要清空所有物品、留言数据吗？此操作不可恢复！')) return;
+  if (!confirm('再次确认：真的要删除所有数据吗？')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(MSG_KEY);
+  items = [];
+  messages = [];
+  save();
+  saveMsg();
+  document.getElementById('settingsModal').classList.remove('active');
+  render();
+}
+
+// ===== 弹窗事件 =====
+document.getElementById('detailModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDetail();
+});
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeEdit();
+});
+document.getElementById('loginModal').addEventListener('click', function(e) {
+  if (e.target === this) document.getElementById('loginModal').classList.remove('active');
+});
+document.getElementById('settingsModal').addEventListener('click', function(e) {
+  if (e.target === this) document.getElementById('settingsModal').classList.remove('active');
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeDetail(); closeEdit(); }
+});
+
+// 登录弹窗回车提交
+document.getElementById('loginPwd').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ===== 初始渲染 =====
+render();
+</script>
+</body>
+</html>
