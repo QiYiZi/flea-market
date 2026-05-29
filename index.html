@@ -400,7 +400,7 @@
           <label>你的 QQ</label>
           <input class="input" id="settingsQQ" type="text" maxlength="30" style="flex:1" placeholder="让买家联系你的QQ号">
         </div>
-        <div class="settings-row">
+        <div class="settings-row" id="settingsPwdRow" style="display:none">
           <label>管理密码</label>
           <input class="input" id="settingsPwd" type="text" maxlength="30" style="flex:1">
         </div>
@@ -857,16 +857,19 @@ function doLogin() {
 // ===== 设置 =====
 function openSettings() {
   document.getElementById('settingsQQ').value = settings.sellerQQ;
-  document.getElementById('settingsPwd').value = settings.adminPassword;
+  document.getElementById('settingsPwdRow').style.display = isAdmin ? 'flex' : 'none';
+  if (isAdmin) document.getElementById('settingsPwd').value = settings.adminPassword;
   document.getElementById('settingsLocation').value = settings.location;
   document.getElementById('settingsModal').classList.add('active');
 }
 
 function saveSettings() {
   settings.sellerQQ = document.getElementById('settingsQQ').value.trim();
-  const newPwd = document.getElementById('settingsPwd').value.trim();
-  if (!newPwd) { alert('密码不能为空'); return; }
-  settings.adminPassword = newPwd;
+  if (isAdmin) {
+    const newPwd = document.getElementById('settingsPwd').value.trim();
+    if (!newPwd) { alert('密码不能为空'); return; }
+    settings.adminPassword = newPwd;
+  }
   settings.location = document.getElementById('settingsLocation').value.trim() || DEFAULT_LOCATION;
   saveSettingsToDisk();
   document.getElementById('settingsModal').classList.remove('active');
