@@ -287,6 +287,26 @@
     .filter-bar { gap: 4px; }
     .sort-select { margin-left: 0; }
   }
+
+  /* comment section */
+  .comments-section { border-top: 1px solid #eee; padding-top: 16px; margin-top: 16px; }
+  .comments-section h3 { font-size: 15px; margin-bottom: 12px; color: #333; }
+  .comment-item { background: #fafafa; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; position: relative; }
+  .comment-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .comment-nickname { font-size: 13px; font-weight: 600; color: #667eea; }
+  .comment-time { font-size: 11px; color: #aaa; }
+  .comment-text { font-size: 14px; color: #333; line-height: 1.5; word-break: break-word; }
+  .comment-empty { text-align: center; color: #ccc; padding: 16px 0; font-size: 13px; }
+  .comment-form { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .comment-form-row { display: flex; gap: 8px; }
+  .comment-form-row .input { flex: 1; }
+  .comment-delete-btn {
+    position: absolute; top: 8px; right: 8px; background: none; border: none;
+    color: #ccc; cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 4px;
+  }
+  .comment-delete-btn:hover { color: #e94560; background: #fff0f0; }
+  .comments-loading { text-align: center; color: #ccc; padding: 16px 0; font-size: 13px; }
+  .comment-error { text-align: center; color: #e94560; padding: 12px 0; font-size: 13px; }
 </style>
 </head>
 <body>
@@ -335,6 +355,18 @@
           <div class="qq-num" id="sellerQQ" onclick="copyQQ()"></div>
           <div class="hint">点击 QQ 号复制，或点下方按钮</div>
           <button class="btn-copy" onclick="copyQQ()">📋 复制 QQ 号</button>
+        </div>
+      </div>
+
+      <div class="comments-section">
+        <h3>💬 留言 <span id="commentsCount">(0)</span></h3>
+        <div id="commentsList"><div class="comment-empty">加载中...</div></div>
+        <div class="comment-form">
+          <input class="input" id="commentNickname" placeholder="你的昵称" maxlength="20">
+          <div class="comment-form-row">
+            <textarea class="input" id="commentMessage" placeholder="写下你想说的话..." rows="2" maxlength="500"></textarea>
+            <button class="btn btn-primary" onclick="submitComment()" style="flex-shrink:0;white-space:nowrap;font-size:13px">💬 发送</button>
+          </div>
         </div>
       </div>
     </div>
@@ -426,6 +458,7 @@ const DATA_URLS = [
 ];
 const DEFAULT_LOCATION = '南区澈苑74-215';
 const CATEGORIES = ['数码电子', '书籍教材', '生活用品', '服饰鞋包', '运动户外', '其他'];
+const COMMENT_API = '/api/comments';
 
 // ===== 设置（存在 localStorage，不影响 data.json）=====
 let settings = {
@@ -657,11 +690,22 @@ function openDetail(id) {
   document.getElementById('sellerQQ').textContent = qq;
 
   document.getElementById('detailModal').classList.add('active');
+
+  // 加载留言
+  loadComments(id);
+
+  // 恢复昵称
+  try {
+    const savedNick = localStorage.getItem('flea_comment_nickname');
+    if (savedNick) document.getElementById('commentNickname').value = savedNick;
+  } catch(e) {}
 }
 
 function closeDetail() {
   document.getElementById('detailModal').classList.remove('active');
   currentItemId = null;
+  document.getElementById('commentsList').innerHTML = '<div class="comment-empty">加载中...</div>';
+  document.getElementById('commentsCount').textContent = '(0)';
 }
 
 function copyQQ() {
@@ -901,6 +945,92 @@ document.addEventListener('keydown', function(e) {
 document.getElementById('loginPwd').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') doLogin();
 });
+
+// ===== 留言 =====
+async function loadComments(itemId) {
+  const list = document.getElementById('commentsList');
+  list.innerHTML = '<div class="comments-loading">加载中...</div>';
+  try {
+    const resp = await fetch(`${COMMENT_API}/${itemId}`);
+    if (!resp.ok) throw new Error('加载失败');
+    const data = await resp.json();
+    document.getElementById('commentsCount').textContent = `(${data.count})`;
+    renderComments(data.comments, itemId);
+  } catch(e) {
+    list.innerHTML = '<div class="comment-error">加载失败，请稍后重试</div>';
+  }
+}
+
+function renderComments(comments, itemId) {
+  const list = document.getElementById('commentsList');
+  if (comments.length === 0) {
+    list.innerHTML = '<div class="comment-empty">还没有留言，来说点什么吧~</div>';
+    return;
+  }
+  list.innerHTML = comments.map(c => {
+    const delBtn = isAdmin
+      ? `<button class="comment-delete-btn" onclick="event.stopPropagation();deleteComment('${itemId}','${c.id}')" title="删除">×</button>`
+      : '';
+    return `<div class="comment-item">
+      ${delBtn}
+      <div class="comment-meta">
+        <span class="comment-nickname">${esc(c.nickname)}</span>
+        <span class="comment-time">${timeAgo(c.createdAt)}</span>
+      </div>
+      <div class="comment-text">${esc(c.message)}</div>
+    </div>`;
+  }).join('');
+}
+
+async function submitComment() {
+  if (!currentItemId) return;
+  const nickname = document.getElementById('commentNickname').value.trim();
+  const message = document.getElementById('commentMessage').value.trim();
+  if (!nickname) { alert('请输入昵称'); return; }
+  if (!message) { alert('请输入留言内容'); return; }
+
+  const btn = document.querySelector('.comment-form .btn-primary');
+  btn.disabled = true;
+  btn.textContent = '发送中...';
+
+  try {
+    const resp = await fetch(`${COMMENT_API}/${currentItemId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nickname, message })
+    });
+    const data = await resp.json();
+    if (!resp.ok) { alert(data.error || '发送失败'); return; }
+
+    document.getElementById('commentMessage').value = '';
+    try { localStorage.setItem('flea_comment_nickname', nickname); } catch(e) {}
+    loadComments(currentItemId);
+  } catch(e) {
+    alert('网络错误，请稍后重试');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💬 发送';
+  }
+}
+
+async function deleteComment(itemId, commentId) {
+  if (!confirm('确定要删除这条留言吗？')) return;
+  try {
+    const resp = await fetch(`${COMMENT_API}/${itemId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: settings.adminPassword, commentId })
+    });
+    if (!resp.ok) {
+      const data = await resp.json();
+      alert(data.error || '删除失败');
+      return;
+    }
+    loadComments(itemId);
+  } catch(e) {
+    alert('网络错误，请稍后重试');
+  }
+}
 
 // ===== 启动 =====
 loadData();

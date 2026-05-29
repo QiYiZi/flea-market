@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "flea-market",
+  "main": "_worker.js",
   "compatibility_date": "2026-05-29",
   "observability": {
     "enabled": true
@@ -10,5 +11,11 @@
   },
   "compatibility_flags": [
     "nodejs_compat"
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "COMMENTS_KV",
+      "id": "<YOUR_KV_NAMESPACE_ID>"
+    }
   ]
 }
