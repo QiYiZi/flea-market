@@ -420,7 +420,10 @@
 
 <script>
 // ===== 配置 =====
-const DATA_URL = 'data.json';
+const DATA_URLS = [
+  'data.json',
+  'https://cdn.jsdelivr.net/gh/QiYiZi/flea-market@main/data.json'
+];
 const DEFAULT_LOCATION = '南区澈苑74-215';
 const CATEGORIES = ['数码电子', '书籍教材', '生活用品', '服饰鞋包', '运动户外', '其他'];
 
@@ -447,8 +450,8 @@ try {
   localItems = JSON.parse(localStorage.getItem('flea_local_items') || '[]');
 } catch(e) { localItems = []; }
 
-// 判断数据来源：如果 localItems 不为空且是管理员，使用 localItems；否则使用 serverItems
-// 对于普通访客，始终使用 serverItems
+// localItems（本地修改）始终优先于 serverItems（线上数据）
+// 管理员首次登录时会自动同步线上数据到本地
 
 let isAdmin = false;
 let currentItemId = null;
@@ -458,14 +461,34 @@ let sortBy = (() => { try { return localStorage.getItem('flea_sort') || 'newest'
 let filterCategory = 'all';
 
 // ===== 加载线上数据 =====
-async function loadData() {
+async function fetchWithTimeout(url, timeout = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
   try {
-    const resp = await fetch(DATA_URL);
-    if (resp.ok) {
-      serverItems = await resp.json();
+    const resp = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+    return resp.ok ? resp : null;
+  } catch (e) {
+    clearTimeout(timer);
+    return null;
+  }
+}
+
+async function loadData() {
+  let loaded = false;
+  for (const url of DATA_URLS) {
+    const resp = await fetchWithTimeout(url);
+    if (resp) {
+      try {
+        serverItems = await resp.json();
+        loaded = true;
+        console.log('数据加载成功: ' + url);
+        break;
+      } catch (e) {}
     }
-  } catch(e) {
-    console.log('未能加载线上数据，使用本地数据');
+  }
+  if (!loaded) {
+    console.log('所有数据源加载失败，使用本地缓存');
   }
 
   // 迁移旧数据：如果 localItems 为空但 localStorage 里有旧格式数据
@@ -483,15 +506,12 @@ async function loadData() {
   render();
 }
 
-// 获取当前显示的物品列表
+// 获取当前显示的物品列表 - localItems 始终优先
 function getActiveItems() {
-  if (isAdmin && localItems.length > 0) {
+  if (localItems.length > 0) {
     return localItems;
   }
-  if (isAdmin && localItems.length === 0 && serverItems.length > 0) {
-    return serverItems;
-  }
-  return serverItems.length > 0 ? serverItems : localItems;
+  return serverItems;
 }
 
 // ===== 渲染 =====
@@ -821,6 +841,11 @@ function toggleAdmin() {
 function doLogin() {
   if (document.getElementById('loginPwd').value === settings.adminPassword) {
     isAdmin = true;
+    // 首次登录：将服务器数据同步到本地，以便管理员编辑/删除
+    if (localItems.length === 0 && serverItems.length > 0) {
+      localItems = [...serverItems];
+      localStorage.setItem('flea_local_items', JSON.stringify(localItems));
+    }
     document.getElementById('loginModal').classList.remove('active');
     document.getElementById('loginPwd').value = '';
     render();
